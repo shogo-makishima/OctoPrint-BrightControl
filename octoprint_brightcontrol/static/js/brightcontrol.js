@@ -10,12 +10,16 @@ $(function() {
         self.timeOff = ko.observable();
         self.timeOff_Bright = ko.observable();
 
+        self.timeZone = ko.observable();
+
         self.onBeforeBinding = function() {
             self.timeOn(self.settings.settings.plugins.brightcontrol.timeOn());
             self.timeOff(self.settings.settings.plugins.brightcontrol.timeOff());
 
             self.timeOff_Bright(self.settings.settings.plugins.brightcontrol.timeOff_Bright());
             self.timeOn_Bright(self.settings.settings.plugins.brightcontrol.timeOff_Bright());
+
+            self.timeZone(self.settings.settings.plugins.brightcontrol.timeZone());
         }
 
 		self.saveData = function() {
@@ -27,6 +31,8 @@ $(function() {
 
                         timeOff_Bright: self.timeOff_Bright(),
                         timeOn_Bright: self.timeOn_Bright(),
+
+                        timeZone: self.timeOn_Bright(),
                     }
                 }
             };

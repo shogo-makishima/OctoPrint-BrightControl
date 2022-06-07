@@ -70,9 +70,9 @@ class BrightControlPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.Templ
 		self.currentSettings: dict = self._settings.settings.get(["plugins", "brightcontrol"], merged=True)
 		self.Update()
 
-	def IsCurrentTime(self, timeOn: str, timeOff: str) -> int:
+	def IsCurrentTime(self, timeOn: str, timeOff: str, timeZone: str = "3") -> int:
 		timeCurrent_T = datetime.datetime.now()
-		timeCurrent_T: Date = Date(timeCurrent_T.hour, timeCurrent_T.minute)
+		timeCurrent_T: Date = Date(timeCurrent_T.hour + float(timeZone), timeCurrent_T.minute)
 
 		timeOn_T = datetime.datetime.strptime(timeOn, "%H:%M")
 		timeOn_T: Date = Date(timeOn_T.hour, timeOn_T.minute)
@@ -118,7 +118,7 @@ class BrightControlPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.Templ
 			try:
 				time.sleep(5)
 
-				timeState: int = self.IsCurrentTime(self.currentSettings["timeOn"], self.currentSettings["timeOff"])
+				timeState: int = self.IsCurrentTime(self.currentSettings["timeOn"], self.currentSettings["timeOff"], self.currentSettings["timeZone"])
 				# self._logger.info(f"[DEBUG] CURRENT STATE -> {timeState} -> {currentSettings}")
 
 				if (self.last_TimeState != timeState):
@@ -131,6 +131,7 @@ class BrightControlPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.Templ
 
 	def get_settings_defaults(self):
 		return {
+			"timeZone": "+3",
 			"timeOn": "06:30",
 			"timeOff": "20:40",
 			"timeOff_Bright": "10",
