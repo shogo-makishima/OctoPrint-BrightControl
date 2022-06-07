@@ -2,7 +2,48 @@ from __future__ import absolute_import
 import octoprint.plugin
 import octoprint.printer
 import octoprint.printer.profile
-import threading, time
+import threading, time, datetime
+
+
+# region Класс для сравнения времени
+class Date:
+	"""
+	Класс даты
+	"""
+
+	def __init__(self, hour: int, minute: int) -> None:
+		"""
+		Инициализация класса даты
+		\n
+		:param hour: [int] => час
+		:param minute: [int] => минута
+		"""
+		self.hour = hour
+		self.minute = minute
+
+	def __str__(self):
+		return f"{self.hour}:{self.minute}"
+
+	def __eq__(self, other):
+		return (self.hour == other.hour and self.minute == other.minute)
+
+	def __ge__(self, other):
+		return self.__eq__(other) or self.__gt__(other)
+
+	def __gt__(self, other):
+		s_hour = self.hour
+		if (self.hour == 0): s_hour = 24
+
+		o_hour = other.hour
+		if (other.hour == 0): o_hour = 24
+
+		if (s_hour > o_hour):
+			return True
+		elif (s_hour == o_hour):
+			return (self.minute > other.minute)
+
+		return False
+#endregion
 
 def Thread(func):
     """
@@ -25,19 +66,43 @@ class BrightControlPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.Templ
 		"""
 
 	def on_after_startup(self):
+		self.last_TimeState: int = -1
+		self.currentSettings: dict = self._settings.settings.get(["plugins", "brightcontrol"], merged=True)
 		self.Update()
 
 	def IsCurrentTime(self, timeOn: str, timeOff: str) -> int:
-		timeCurrent_T = time.gmtime()
-		timeOn_T = time.strptime(timeOn, "%H:%M")
-		timeOff_T = time.strptime(timeOn, "%H:%M")
+		timeCurrent_T = datetime.datetime.now()
+		timeCurrent_T: Date = Date(timeCurrent_T.hour, timeCurrent_T.minute)
 
-		if (timeOn_T < timeOff_T):
-			if (timeOn_T < timeCurrent_T < timeOff_T): return self.TimeState.DAY
-			else: return self.TimeState.NIGHT
+		timeOn_T = datetime.datetime.strptime(timeOn, "%H:%M")
+		timeOn_T: Date = Date(timeOn_T.hour, timeOn_T.minute)
+
+		timeOff_T = datetime.datetime.strptime(timeOff, "%H:%M")
+		timeOff_T: Date = Date(timeOff_T.hour, timeOff_T.minute)
+
+		if (timeOn_T <= timeCurrent_T <= timeOff_T): return self.TimeState.DAY
+		else: return self.TimeState.NIGHT
+
+	def ChangeLedBright(self, timeState: int) -> None:
+		"""
+		Изменить яркость подсветки
+		\n
+		:param timeState: [int] => стадия текущего времени
+		:return: None
+		"""
+		if (timeState == self.TimeState.DAY):
+			timeOn_Bright = int(self.currentSettings["timeOn_Bright"])
+			self._logger.info(f"[DEBUG] CHANGE STATE -> {timeState} -> DAY -> {timeOn_Bright}")
+
+			self._printer.commands(f"""M355 P{round(timeOn_Bright * 2.55)} S1""")
 		else:
-			if (timeOff_T < timeCurrent_T < timeOn_T): return self.TimeState.NIGHT
-			else: return self.TimeState.DAY
+			timeOff_Bright = int(self.currentSettings["timeOff_Bright"])
+			self._logger.info(f"[DEBUG] CHANGE STATE -> {timeState} -> NIGHT -> {timeOff_Bright}")
+
+			if (timeOff_Bright == 0):
+				self._printer.commands(f"""M355 P0 S0""")
+			else:
+				self._printer.commands(f"""M355 P{round(timeOff_Bright * 2.55)} S1""")
 
 	@Thread
 	def Update(self) -> None:
@@ -48,35 +113,28 @@ class BrightControlPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.Templ
 		"""
 
 		b_isSend: bool = False
-		last_TimeState: int = -1
 
 		while (True):
 			try:
 				time.sleep(5)
-				currentSettings: dict = self._settings.settings.get(["plugins", "brightcontrol"])
-				timeState: int = self.IsCurrentTime(currentSettings["timeOn"], currentSettings["timeOff"])
 
-				if (last_TimeState != timeState):
-					if (timeState == self.TimeState.DAY):
-						self._printer.commands(f"""M355 P{int(currentSettings["timeOn_Bright"]) * 2.55} S1""")
-					else:
-						timeOff_Bright = int(currentSettings["timeOff_Bright"])
-						if (timeOff_Bright == 0):
-							self._printer.commands(f"""M355 P0 S0""")
-						else:
-							self._printer.commands(f"""M355 P{timeOff_Bright * 2.55} S1""")
+				timeState: int = self.IsCurrentTime(self.currentSettings["timeOn"], self.currentSettings["timeOff"])
+				# self._logger.info(f"[DEBUG] CURRENT STATE -> {timeState} -> {currentSettings}")
 
-					last_TimeState = timeState
+				if (self.last_TimeState != timeState):
+					self.ChangeLedBright(timeState)
+
+					self.last_TimeState = timeState
 			except Exception as exception:
 				print(exception)
 				return
 
 	def get_settings_defaults(self):
 		return {
-			"timeOn": "6:30",
+			"timeOn": "06:30",
 			"timeOff": "20:40",
-			"timeOff_Bright": 10,
-			"timeOn_Bright": 100,
+			"timeOff_Bright": "10",
+			"timeOn_Bright": "100",
 		}
 
 	def get_template_configs(self):
@@ -87,7 +145,11 @@ class BrightControlPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.Templ
 
 	def on_settings_save(self, data):
 		self._logger.info(data)
+
 		octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
+
+		self.currentSettings: dict = self._settings.settings.get(["plugins", "brightcontrol"], merged=True)
+		self.ChangeLedBright(self.last_TimeState)
 
 	def get_assets(self):
 		return dict(

@@ -5,6 +5,7 @@ $(function() {
         self.settings = parameters[0];
 
         self.timeOn = ko.observable();
+        self.timeOn_Bright = ko.observable();
 
         self.timeOff = ko.observable();
         self.timeOff_Bright = ko.observable();
@@ -14,7 +15,7 @@ $(function() {
             self.timeOff(self.settings.settings.plugins.brightcontrol.timeOff());
 
             self.timeOff_Bright(self.settings.settings.plugins.brightcontrol.timeOff_Bright());
-            self.timeOn_Bright(self.settings.settings.plugins.brightcontrol.timeOn_Bright());
+            self.timeOn_Bright(self.settings.settings.plugins.brightcontrol.timeOff_Bright());
         }
 
 		self.saveData = function() {

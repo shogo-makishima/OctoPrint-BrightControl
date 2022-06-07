@@ -1,18 +1,20 @@
 <form class="form-horizontal">
-    <div class="control-group">
-        <div class="controls">
-            <h3>Выключение света</h3>
-            <h4>Время</h4>
-            <input type="time" id="timeOff" class="input-block-level" data-bind="value: settings.plugins.brightcontrol.timeOff">
-            <h4>Яркость</h4>
-            <input type="range" id="timeOff_Bright" class="input-block-level" min="0" max="100" value="10" data-bind="value: settings.plugins.brightcontrol.timeOff_Bright" oninput="timeOff_Bright_Amount.value=timeOff_Bright.value">
-            <h5><output id="timeOff_Bright_Amount" name="timeOff_Bright_Amount" class="input-block-level" for="timeOff_Bright">0</output></h5>
-            <h3>Включение света</h3>
-            <h4>Время</h4>
-            <input type="time" id="timeOn" class="input-block-level" data-bind="value: settings.plugins.brightcontrol.timeOn">
-            <h4>Яркость</h4>
-            <input type="range" id="timeOn_Bright" class="input-block-level" min="0" max="100" value="10" data-bind="value: settings.plugins.brightcontrol.timeOn_Bright" oninput="timeOn_Bright_Amount.value=timeOn_Bright.value">
-            <h5><output id="timeOn_Bright_Amount" name="timeOn_Bright_Amount" class="input-block-level" for="timeOn_Bright">0</output></h5>
-        </div>
-    </div>
+    <h3>Выбор времени</h3>
+    <p>
+        Время выключения ОБЯЗАТЕЛЬНО должно быть больше времени включения
+    </p>
+
+    <h4>Свет включен (день-утро)</h4>
+    <input type="time" id="timeOn" class="input-block-level" data-bind="value: settings.plugins.brightcontrol.timeOn">
+    <h4>Свет выключен (вечер)</h4>
+    <input type="time" id="timeOff" class="input-block-level" data-bind="value: settings.plugins.brightcontrol.timeOff">
+
+    <h3>Выбор яркости</h3>
+    <h4>Свет выключен</h4>
+    <input type="range" id="timeOff_Bright" class="input-block-level" min="0" max="100" value="10" data-bind="value: settings.plugins.brightcontrol.timeOff_Bright" oninput="timeOff_Bright_Amount.value=timeOff_Bright.value">
+    <output id="timeOff_Bright_Amount" name="timeOff_Bright_Amount" class="input-block-level" data-bind="value: settings.plugins.brightcontrol.timeOff_Bright" for="timeOff_Bright">0</output>
+
+    <h4>Свет включен</h4>
+    <input type="range" id="timeOn_Bright" class="input-block-level" min="0" max="100" value="10" data-bind="value: settings.plugins.brightcontrol.timeOn_Bright" oninput="timeOn_Bright_Amount.value=timeOn_Bright.value">
+    <output id="timeOn_Bright_Amount" name="timeOn_Bright_Amount" class="input-block-level" data-bind="value: settings.plugins.brightcontrol.timeOn_Bright" for="timeOn_Bright">0</output>
 </form>
