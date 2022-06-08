@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/bright-control.iml" filepath="$PROJECT_DIR$/.idea/bright-control.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/OctoPrint-PSUControl.iml" filepath="$PROJECT_DIR$/.idea/OctoPrint-PSUControl.iml" />
     </modules>
   </component>
 </project>

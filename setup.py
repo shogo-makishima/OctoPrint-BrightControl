@@ -11,14 +11,14 @@ plugin_package = "octoprint_brightcontrol"
 
 # The plugin's human readable name. Can be overwritten within OctoPrint's internal data via __plugin_name__ in the
 # plugin module
-plugin_name = "OctoPrint-Bright-Control"
+plugin_name = "OctoPrint-BrightControl"
 
 # The plugin's version. Can be overwritten within OctoPrint's internal data via __plugin_version__ in the plugin module
-plugin_version = "1.0.3"
+plugin_version = "1.0.5"
 
 # The plugin's description. Can be overwritten within OctoPrint's internal data via __plugin_description__ in the plugin
 # module
-plugin_description = """Plugin for control bright of led via GCODE by current time"""
+plugin_description = """Plugin to control bright via gcode command (marlin)"""
 
 # The plugin's author. Can be overwritten within OctoPrint's internal data via __plugin_author__ in the plugin module
 plugin_author = "Shogo Makishima"
@@ -27,7 +27,7 @@ plugin_author = "Shogo Makishima"
 plugin_author_email = "shogomakishima2112@gmail.com"
 
 # The plugin's homepage URL. Can be overwritten within OctoPrint's internal data via __plugin_url__ in the plugin module
-plugin_url = "https://github.com/shogo-makishima/OctoPrint-Bright-Control"
+plugin_url = "https://github.com/shogo-makishima/OctoPrint-BrightControl"
 
 # The plugin's license. Can be overwritten within OctoPrint's internal data via __plugin_license__ in the plugin module
 plugin_license = "AGPLv3"
