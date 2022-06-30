@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import octoprint.plugin
 import octoprint.printer
+import octoprint.util
 import octoprint.printer.profile
 import threading, time, datetime
 
@@ -68,7 +69,20 @@ class BrightControlPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.Templ
 	def on_after_startup(self):
 		self.last_TimeState: int = -1
 		self.currentSettings: dict = self._settings.settings.get(["plugins", "brightcontrol"], merged=True)
-		self.Update()
+
+		self.updateTimer = octoprint.util.RepeatedTimer(5, self.Update)
+		self.updateTimer.start()
+		print(1)
+
+	#region Манипуляции с потоками
+	def on_shutdown(self):
+		self._stopUpdateTimer()
+
+	def _stopUpdateTimer(self):
+		print("BC is Cancel!")
+		if (self.updateTimer != None):
+			self.updateTimer.cancel()
+	#endregion
 
 	def IsCurrentTime(self, timeOn: str, timeOff: str, timeZone: str = "3") -> int:
 		timeCurrent_T = datetime.datetime.now()
@@ -104,7 +118,6 @@ class BrightControlPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.Templ
 			else:
 				self._printer.commands(f"""M355 P{round(timeOff_Bright * 2.55)} S1""")
 
-	@Thread
 	def Update(self) -> None:
 		"""
 		Вызов циклической функции раз в 5 секунд
@@ -112,22 +125,20 @@ class BrightControlPlugin(octoprint.plugin.StartupPlugin, octoprint.plugin.Templ
 		:return: None
 		"""
 
+		print("BC is Alive!")
+
 		b_isSend: bool = False
 
-		while (True):
-			try:
-				time.sleep(5)
+		try:
+			timeState: int = self.IsCurrentTime(self.currentSettings["timeOn"], self.currentSettings["timeOff"], self.currentSettings["timeZone"])
+			# self._logger.info(f"[DEBUG] CURRENT STATE -> {timeState} -> {currentSettings}")
 
-				timeState: int = self.IsCurrentTime(self.currentSettings["timeOn"], self.currentSettings["timeOff"], self.currentSettings["timeZone"])
-				# self._logger.info(f"[DEBUG] CURRENT STATE -> {timeState} -> {currentSettings}")
+			if (self.last_TimeState != timeState):
+				self.ChangeLedBright(timeState)
 
-				if (self.last_TimeState != timeState):
-					self.ChangeLedBright(timeState)
-
-					self.last_TimeState = timeState
-			except Exception as exception:
-				print(exception)
-				return
+				self.last_TimeState = timeState
+		except Exception as exception:
+			print(exception)
 
 	def get_settings_defaults(self):
 		return {
